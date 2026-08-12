@@ -23,6 +23,7 @@ services:
     volumes:
       - ./networkFiles/genesis.json:/config/genesis.json:ro
       - ./networkFiles/keys/0x49ed9cf6097b66cd13ac98ba9dd277f0fc02651a/key:/opt/besu/keys/key:ro
+      - ./data/validator1:/opt/besu/database
     command: >
       --genesis-file=/config/genesis.json
       --node-private-key-file=/opt/besu/keys/key
@@ -48,6 +49,7 @@ services:
     volumes:
       - ./networkFiles/genesis.json:/config/genesis.json:ro
       - ./networkFiles/keys/0xad08838f36ee1d0ba0e4c34d30d3f4616392f4c8/key:/opt/besu/keys/key:ro
+      - ./data/validator2:/opt/besu/database
     command: >
       --genesis-file=/config/genesis.json
       --node-private-key-file=/opt/besu/keys/key
@@ -73,6 +75,7 @@ services:
     volumes:
       - ./networkFiles/genesis.json:/config/genesis.json:ro
       - ./networkFiles/keys/0xcea40a19ffdace70486ebd8dfb38ace744cab7f6/key:/opt/besu/keys/key:ro
+      - ./data/validator3:/opt/besu/database
     command: >
       --genesis-file=/config/genesis.json
       --node-private-key-file=/opt/besu/keys/key
@@ -98,6 +101,7 @@ services:
     volumes:
       - ./networkFiles/genesis.json:/config/genesis.json:ro
       - ./networkFiles/keys/0xf031b0e963b8ea6c166414af20675021aea7c8c2/key:/opt/besu/keys/key:ro
+      - ./data/validator4:/opt/besu/database
     command: >
       --genesis-file=/config/genesis.json
       --node-private-key-file=/opt/besu/keys/key

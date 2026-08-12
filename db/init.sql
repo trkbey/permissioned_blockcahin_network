@@ -6,10 +6,7 @@ CREATE TABLE tables (
 INSERT INTO tables ("table_id", "table_name") VALUES 
 (1, 'date'),
 (2, 'product'),
-(3, 'machine'),
-(4, 'shift'),
 (5, 'employee'),
-(6, 'factory'),
 (7, 'production');
 
 CREATE TABLE date (
@@ -132,10 +129,7 @@ BEGIN
   
   IF TG_TABLE_NAME = 'date' THEN v_record_id := NEW.date_id::TEXT;
   ELSIF TG_TABLE_NAME = 'product' THEN v_record_id := NEW.product_id::TEXT;
-  ELSIF TG_TABLE_NAME = 'machine' THEN v_record_id := NEW.machine_id::TEXT;
-  ELSIF TG_TABLE_NAME = 'shift' THEN v_record_id := NEW.shift_id::TEXT;
   ELSIF TG_TABLE_NAME = 'employee' THEN v_record_id := NEW.employee_id::TEXT;
-  ELSIF TG_TABLE_NAME = 'factory' THEN v_record_id := NEW.factory_id::TEXT;
   ELSIF TG_TABLE_NAME = 'production' THEN v_record_id := NEW.production_id::TEXT;
   END IF;
 
@@ -155,10 +149,7 @@ $$ LANGUAGE plpgsql;
 
 CREATE TRIGGER trigger_notify_date AFTER INSERT ON date FOR EACH ROW EXECUTE FUNCTION notify_new_record();
 CREATE TRIGGER trigger_notify_product AFTER INSERT ON product FOR EACH ROW EXECUTE FUNCTION notify_new_record();
-CREATE TRIGGER trigger_notify_machine AFTER INSERT ON machine FOR EACH ROW EXECUTE FUNCTION notify_new_record();
-CREATE TRIGGER trigger_notify_shift AFTER INSERT ON shift FOR EACH ROW EXECUTE FUNCTION notify_new_record();
 CREATE TRIGGER trigger_notify_employee AFTER INSERT ON employee FOR EACH ROW EXECUTE FUNCTION notify_new_record();
-CREATE TRIGGER trigger_notify_factory AFTER INSERT ON factory FOR EACH ROW EXECUTE FUNCTION notify_new_record();
 CREATE TRIGGER trigger_notify_production AFTER INSERT ON production FOR EACH ROW EXECUTE FUNCTION notify_new_record();
 
 insert into date (
