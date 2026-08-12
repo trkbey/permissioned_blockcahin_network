@@ -1,0 +1,17 @@
+version: '3.8'
+
+services:
+  backend-api:
+    image: besu-backend-api:latest
+    build: .
+    container_name: backend-api
+    ports:
+      - "3000:3000"
+    environment:
+      - DATABASE_URL=postgresql://tarik:ayb@host.docker.internal:5432/appdb
+      - RPC_URL=http://host.docker.internal:9545
+      - PRIVATE_KEY=0x6e45395610238c2c8f7b27575aba1e8d162793ad4bbc53d51a0db097feb3a9b5
+      - CONTRACT_ADDRESS=0xCaE1166C445713a6c091D3C5F967e6237876CF34
+      - PORT=3000
+    extra_hosts:
+      - "host.docker.internal:host-gateway"

@@ -1,0 +1,17 @@
+version: '3.8'
+
+services:
+  smart-contract-deployer:
+    build: .
+    image: besu-contract-deployer:latest
+    container_name: contract-deployer
+    environment:
+      - PRIVATE_KEY=0x6e45395610238c2c8f7b27575aba1e8d162793ad4bbc53d51a0db097feb3a9b5
+
+    networks:
+      - besu-net
+
+networks:
+  besu-net:
+    external:
+      name: blockchain-network_besu-net

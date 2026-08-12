@@ -1,0 +1,5 @@
+[
+    "function anchorHash(string memory _recordId, string memory _recordHash) public",
+    "function recordHashes(string memory) public view returns (string memory)",
+    "event HashAnchored(string indexed recordId, string recordHash, address sender, uint256 timestamp)"
+]
