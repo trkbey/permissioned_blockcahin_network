@@ -23,20 +23,9 @@ services:
     volumes:
       - ./networkFiles/genesis.json:/config/genesis.json:ro
       - ./networkFiles/keys/0x49ed9cf6097b66cd13ac98ba9dd277f0fc02651a/key:/opt/besu/keys/key:ro
-      - ./data/validator1:/opt/besu/data
+      - besu_data_1:/opt/besu/data
     command: >
-      --genesis-file=/config/genesis.json
-      --node-private-key-file=/opt/besu/keys/key
-      --rpc-http-enabled
-      --rpc-http-api=ETH,NET,QBFT,ADMIN,WEB3
-      --rpc-http-host=0.0.0.0
-      --rpc-http-port=8545
-      --rpc-http-cors-origins=*
-      --host-allowlist=*
-      --p2p-host=172.28.0.11
-      --p2p-port=30303
-      --min-gas-price=0
-      --bootnodes=enode://178338ab034f881345f208e70289baf81b464c55d146c610c8a24bf2ef13bb847f1555ce0baf66587e96379267f3853f2be63e688de4670f321b9fb14e6acd4c@172.28.0.11:30303,enode://4454f890538c11f7b3b88a66da04010c89a2b246362bc9abbe3e26e3250a855f21be81ae9599fe6dc1081b89363e7ffe8f5bbed014a7cc40961d5bddb3f4d8fd@172.28.0.12:30303,enode://07ab4ff42b81f61b95bf351b0a60fcd689d26226b2d3cda95bf3da5dc6bc94c4ca3dc36ac1661a6ecd7d4775f624bff4a0d3bb66bcf322c0ff789b028150c627@172.28.0.13:30303
+      --genesis-file=/config/genesis.json --data-path=/opt/besu/data --node-private-key-file=/opt/besu/keys/key --rpc-http-enabled --rpc-http-api=ETH,NET,QBFT,ADMIN,WEB3 --rpc-http-host=0.0.0.0 --rpc-http-port=8545 --rpc-http-cors-origins=* --host-allowlist=* --p2p-host=172.28.0.11 --p2p-port=30303 --min-gas-price=0 --bootnodes=enode://178338ab034f881345f208e70289baf81b464c55d146c610c8a24bf2ef13bb847f1555ce0baf66587e96379267f3853f2be63e688de4670f321b9fb14e6acd4c@172.28.0.11:30303,enode://4454f890538c11f7b3b88a66da04010c89a2b246362bc9abbe3e26e3250a855f21be81ae9599fe6dc1081b89363e7ffe8f5bbed014a7cc40961d5bddb3f4d8fd@172.28.0.12:30303,enode://07ab4ff42b81f61b95bf351b0a60fcd689d26226b2d3cda95bf3da5dc6bc94c4ca3dc36ac1661a6ecd7d4775f624bff4a0d3bb66bcf322c0ff789b028150c627@172.28.0.13:30303
 
   validator2:
     <<: *besu-common
@@ -49,20 +38,9 @@ services:
     volumes:
       - ./networkFiles/genesis.json:/config/genesis.json:ro
       - ./networkFiles/keys/0xad08838f36ee1d0ba0e4c34d30d3f4616392f4c8/key:/opt/besu/keys/key:ro
-      - ./data/validator2:/opt/besu/data
+      - besu_data_2:/opt/besu/data
     command: >
-      --genesis-file=/config/genesis.json
-      --node-private-key-file=/opt/besu/keys/key
-      --rpc-http-enabled
-      --rpc-http-api=ETH,NET,QBFT,ADMIN,WEB3
-      --rpc-http-host=0.0.0.0
-      --rpc-http-port=8545
-      --rpc-http-cors-origins=*
-      --host-allowlist=*
-      --p2p-host=172.28.0.12
-      --p2p-port=30303
-      --min-gas-price=0
-      --bootnodes=enode://178338ab034f881345f208e70289baf81b464c55d146c610c8a24bf2ef13bb847f1555ce0baf66587e96379267f3853f2be63e688de4670f321b9fb14e6acd4c@172.28.0.11:30303,enode://4454f890538c11f7b3b88a66da04010c89a2b246362bc9abbe3e26e3250a855f21be81ae9599fe6dc1081b89363e7ffe8f5bbed014a7cc40961d5bddb3f4d8fd@172.28.0.12:30303,enode://07ab4ff42b81f61b95bf351b0a60fcd689d26226b2d3cda95bf3da5dc6bc94c4ca3dc36ac1661a6ecd7d4775f624bff4a0d3bb66bcf322c0ff789b028150c627@172.28.0.13:30303
+      --genesis-file=/config/genesis.json --data-path=/opt/besu/data --node-private-key-file=/opt/besu/keys/key --rpc-http-enabled --rpc-http-api=ETH,NET,QBFT,ADMIN,WEB3 --rpc-http-host=0.0.0.0 --rpc-http-port=8545 --rpc-http-cors-origins=* --host-allowlist=* --p2p-host=172.28.0.12 --p2p-port=30303 --min-gas-price=0 --bootnodes=enode://178338ab034f881345f208e70289baf81b464c55d146c610c8a24bf2ef13bb847f1555ce0baf66587e96379267f3853f2be63e688de4670f321b9fb14e6acd4c@172.28.0.11:30303,enode://4454f890538c11f7b3b88a66da04010c89a2b246362bc9abbe3e26e3250a855f21be81ae9599fe6dc1081b89363e7ffe8f5bbed014a7cc40961d5bddb3f4d8fd@172.28.0.12:30303,enode://07ab4ff42b81f61b95bf351b0a60fcd689d26226b2d3cda95bf3da5dc6bc94c4ca3dc36ac1661a6ecd7d4775f624bff4a0d3bb66bcf322c0ff789b028150c627@172.28.0.13:30303
 
   validator3:
     <<: *besu-common
@@ -75,20 +53,9 @@ services:
     volumes:
       - ./networkFiles/genesis.json:/config/genesis.json:ro
       - ./networkFiles/keys/0xcea40a19ffdace70486ebd8dfb38ace744cab7f6/key:/opt/besu/keys/key:ro
-      - ./data/validator3:/opt/besu/data
+      - besu_data_3:/opt/besu/data
     command: >
-      --genesis-file=/config/genesis.json
-      --node-private-key-file=/opt/besu/keys/key
-      --rpc-http-enabled
-      --rpc-http-api=ETH,NET,QBFT,ADMIN,WEB3
-      --rpc-http-host=0.0.0.0
-      --rpc-http-port=8545
-      --rpc-http-cors-origins=*
-      --host-allowlist=*
-      --p2p-host=172.28.0.13
-      --p2p-port=30303
-      --min-gas-price=0
-      --bootnodes=enode://178338ab034f881345f208e70289baf81b464c55d146c610c8a24bf2ef13bb847f1555ce0baf66587e96379267f3853f2be63e688de4670f321b9fb14e6acd4c@172.28.0.11:30303,enode://4454f890538c11f7b3b88a66da04010c89a2b246362bc9abbe3e26e3250a855f21be81ae9599fe6dc1081b89363e7ffe8f5bbed014a7cc40961d5bddb3f4d8fd@172.28.0.12:30303,enode://07ab4ff42b81f61b95bf351b0a60fcd689d26226b2d3cda95bf3da5dc6bc94c4ca3dc36ac1661a6ecd7d4775f624bff4a0d3bb66bcf322c0ff789b028150c627@172.28.0.13:30303
+      --genesis-file=/config/genesis.json --data-path=/opt/besu/data --node-private-key-file=/opt/besu/keys/key --rpc-http-enabled --rpc-http-api=ETH,NET,QBFT,ADMIN,WEB3 --rpc-http-host=0.0.0.0 --rpc-http-port=8545 --rpc-http-cors-origins=* --host-allowlist=* --p2p-host=172.28.0.13 --p2p-port=30303 --min-gas-price=0 --bootnodes=enode://178338ab034f881345f208e70289baf81b464c55d146c610c8a24bf2ef13bb847f1555ce0baf66587e96379267f3853f2be63e688de4670f321b9fb14e6acd4c@172.28.0.11:30303,enode://4454f890538c11f7b3b88a66da04010c89a2b246362bc9abbe3e26e3250a855f21be81ae9599fe6dc1081b89363e7ffe8f5bbed014a7cc40961d5bddb3f4d8fd@172.28.0.12:30303,enode://07ab4ff42b81f61b95bf351b0a60fcd689d26226b2d3cda95bf3da5dc6bc94c4ca3dc36ac1661a6ecd7d4775f624bff4a0d3bb66bcf322c0ff789b028150c627@172.28.0.13:30303
 
   validator4:
     <<: *besu-common
@@ -101,17 +68,12 @@ services:
     volumes:
       - ./networkFiles/genesis.json:/config/genesis.json:ro
       - ./networkFiles/keys/0xf031b0e963b8ea6c166414af20675021aea7c8c2/key:/opt/besu/keys/key:ro
-      - ./data/validator4:/opt/besu/data
+      - besu_data_4:/opt/besu/data
     command: >
-      --genesis-file=/config/genesis.json
-      --node-private-key-file=/opt/besu/keys/key
-      --rpc-http-enabled
-      --rpc-http-api=ETH,NET,QBFT,ADMIN,WEB3
-      --rpc-http-host=0.0.0.0
-      --rpc-http-port=8545
-      --rpc-http-cors-origins=*
-      --host-allowlist=*
-      --p2p-host=172.28.0.14
-      --p2p-port=30303
-      --min-gas-price=0
-      --bootnodes=enode://178338ab034f881345f208e70289baf81b464c55d146c610c8a24bf2ef13bb847f1555ce0baf66587e96379267f3853f2be63e688de4670f321b9fb14e6acd4c@172.28.0.11:30303,enode://4454f890538c11f7b3b88a66da04010c89a2b246362bc9abbe3e26e3250a855f21be81ae9599fe6dc1081b89363e7ffe8f5bbed014a7cc40961d5bddb3f4d8fd@172.28.0.12:30303,enode://07ab4ff42b81f61b95bf351b0a60fcd689d26226b2d3cda95bf3da5dc6bc94c4ca3dc36ac1661a6ecd7d4775f624bff4a0d3bb66bcf322c0ff789b028150c627@172.28.0.13:30303
+      --genesis-file=/config/genesis.json --data-path=/opt/besu/data --node-private-key-file=/opt/besu/keys/key --rpc-http-enabled --rpc-http-api=ETH,NET,QBFT,ADMIN,WEB3 --rpc-http-host=0.0.0.0 --rpc-http-port=8545 --rpc-http-cors-origins=* --host-allowlist=* --p2p-host=172.28.0.14 --p2p-port=30303 --min-gas-price=0 --bootnodes=enode://178338ab034f881345f208e70289baf81b464c55d146c610c8a24bf2ef13bb847f1555ce0baf66587e96379267f3853f2be63e688de4670f321b9fb14e6acd4c@172.28.0.11:30303,enode://4454f890538c11f7b3b88a66da04010c89a2b246362bc9abbe3e26e3250a855f21be81ae9599fe6dc1081b89363e7ffe8f5bbed014a7cc40961d5bddb3f4d8fd@172.28.0.12:30303,enode://07ab4ff42b81f61b95bf351b0a60fcd689d26226b2d3cda95bf3da5dc6bc94c4ca3dc36ac1661a6ecd7d4775f624bff4a0d3bb66bcf322c0ff789b028150c627@172.28.0.13:30303
+
+volumes:
+  besu_data_1:
+  besu_data_2:
+  besu_data_3:
+  besu_data_4:

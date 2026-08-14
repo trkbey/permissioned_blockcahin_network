@@ -68,6 +68,19 @@ async function syncUnanchoredRecords() {
     const client = await pool.connect();
 
     try {
+        // Blokzincir reset durumunu kontrol et
+        const checkRes = await client.query('SELECT table_id, record_id FROM hash_anchors LIMIT 1');
+        if (checkRes.rows.length > 0) {
+            const sample = checkRes.rows[0];
+            const uniqueBlockchainId = `${sample.table_id}_${sample.record_id}`;
+            const chainHash = await contract.recordHashes(uniqueBlockchainId);
+            if (!chainHash || chainHash === "") {
+                console.log("[SYNC] UYARI: Veritabaninda kayit var ama Blokzincirde bulunamadi! Ag sifirlanmis olabilir. Tum kayitlar yeniden muhurlenecek...");
+                await client.query('TRUNCATE TABLE hash_anchors CASCADE');
+                await client.query('TRUNCATE TABLE verification_log CASCADE');
+            }
+        }
+
         const tablesRes = await client.query('SELECT table_id, table_name FROM tables');
 
         for (const row of tablesRes.rows) {

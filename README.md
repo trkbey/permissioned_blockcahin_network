@@ -24,15 +24,34 @@ docker-compose up -d
 ```
 *(Port: `5432`, Veritabanı: `appdb`)*
 
-### 3. Backend (API) Uygulamasını Başlatma
-Veritabanı ve blokzincir ile iletişim kuran backend servisini ayağa kaldırır.
+### 3. Akıllı Sözleşmeyi Dağıtma ve .env Ayarlama
+Projeyi ilk defa kuruyorsanız veya blokzincir ağınız sıfırlandıysa, akıllı sözleşmeyi (Smart Contract) ağa yüklemeli ve adresini uygulamanıza tanıtmalısınız:
+```bash
+cd ../contract
+npm install
+npm run deploy
+```
+*Bu komut size bir sözleşme adresi verecektir (Örn: `0x123...`). Bu adresi kopyalayın.*
+
+Ardından `app` dizini altında bir `.env` dosyası oluşturun ve içerisine aşağıdaki bilgileri kendi sözleşme adresinizle birlikte ekleyin:
+```env
+PORT=3000
+DATABASE_URL=postgresql://tarik:ayb@postgres_db:5432/appdb
+RPC_URL=http://validator1:8545
+PRIVATE_KEY=0x6e45395610238c2c8f7b27575aba1e8d162793ad4bbc53d51a0db097feb3a9b5
+CONTRACT_ADDRESS=<Kopyaladiginiz_Adresi_Buraya_Yapistirin>
+```
+*(Not: `DATABASE_URL` ve `RPC_URL` değerleri Docker network içinden erişime göre yazılmıştır. Docker-compose kullanıyorsanız bu şekilde kalmalıdır.)*
+
+### 4. Backend (API) Uygulamasını Başlatma
+Veritabanı ve blokzincir ile iletişim kuran backend servisini ayağa kaldırır. Bu servis başlarken veritabanı ile blokzinciri karşılaştırır ve eksik olan kayıtları otomatik olarak blokzincire mühürler.
 ```bash
 cd ../app
 docker-compose up -d
 ```
 *(Port: `3000`)*
 
-### 4. Frontend Uygulamasını Başlatma
+### 5. Frontend Uygulamasını Başlatma
 Kullanıcı arayüzünü sunan web sunucusunu ayağa kaldırır.
 ```bash
 cd ../frontend
