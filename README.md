@@ -36,8 +36,8 @@ npm run deploy
 Ardından `app` dizini altında bir `.env` dosyası oluşturun ve içerisine aşağıdaki bilgileri kendi sözleşme adresinizle birlikte ekleyin:
 ```env
 PORT=3000
-DATABASE_URL=postgresql://tarik:ayb@postgres_db:5432/appdb
-RPC_URL=http://validator1:8545
+DATABASE_URL=postgresql://tarik:ayb@host.docker.internal:5432/appdb
+RPC_URL=http://host.docker.internal:9545
 PRIVATE_KEY=0x6e45395610238c2c8f7b27575aba1e8d162793ad4bbc53d51a0db097feb3a9b5
 CONTRACT_ADDRESS=<Kopyaladiginiz_Adresi_Buraya_Yapistirin>
 ```

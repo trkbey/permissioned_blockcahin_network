@@ -73,7 +73,18 @@ async function syncUnanchoredRecords() {
         if (checkRes.rows.length > 0) {
             const sample = checkRes.rows[0];
             const uniqueBlockchainId = `${sample.table_id}_${sample.record_id}`;
-            const chainHash = await contract.recordHashes(uniqueBlockchainId);
+            let chainHash = null;
+            try {
+                chainHash = await contract.recordHashes(uniqueBlockchainId);
+            } catch (err) {
+                if (err.code === 'BAD_DATA' && err.value === '0x') {
+                    console.error("\n[SYNC] FATAL ERROR: Akıllı sözleşme bulunamadı! (Ağ tamamen sıfırlanmış).");
+                    console.error("[SYNC] Lütfen önce 'contract' klasörüne gidip 'npm run deploy' ile sözleşmeyi ağa yükleyin, ardından backend'i yeniden başlatın!\n");
+                    return; // Sözleşme yoksa senkronizasyonu durdur
+                }
+                throw err;
+            }
+
             if (!chainHash || chainHash === "") {
                 console.log("[SYNC] UYARI: Veritabaninda kayit var ama Blokzincirde bulunamadi! Ag sifirlanmis olabilir. Tum kayitlar yeniden muhurlenecek...");
                 await client.query('TRUNCATE TABLE hash_anchors CASCADE');
