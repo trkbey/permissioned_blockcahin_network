@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Header from './components/Header';
 import AddRecordForm from './components/AddRecordForm';
 import VerificationTable from './components/VerificationTable';
@@ -8,16 +8,28 @@ function App() {
   const [activeTab, setActiveTab] = useState('add');
   const [addTable, setAddTable] = useState('production');
   const [verifyTable, setVerifyTable] = useState('production');
+  const [isDarkMode, setIsDarkMode] = useState(true);
+
+  useEffect(() => {
+    if (isDarkMode) {
+      document.body.classList.add('dark');
+    } else {
+      document.body.classList.remove('dark');
+    }
+  }, [isDarkMode]);
+
+  const toggleDarkMode = () => setIsDarkMode(!isDarkMode);
 
   return (
     <>
-      <div className="app-background">
-        <div className="glow-orb orb-1"></div>
-        <div className="glow-orb orb-2"></div>
-      </div>
 
       <div className="app-container">
-        <Header activeTab={activeTab} setActiveTab={setActiveTab} />
+        <Header 
+          activeTab={activeTab} 
+          setActiveTab={setActiveTab} 
+          isDarkMode={isDarkMode}
+          toggleDarkMode={toggleDarkMode}
+        />
         
         <main className="content-wrapper">
           {activeTab === 'add' && (

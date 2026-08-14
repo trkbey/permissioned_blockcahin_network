@@ -6,7 +6,7 @@ module.exports = {
     solidity: "0.8.19",
     networks: {
         besuLocal: {
-            url: "http://127.0.0.1:9545",
+            url: "http://validator1:8545",
             chainId: 1337,
             accounts: [PRIVATE_KEY]
         }

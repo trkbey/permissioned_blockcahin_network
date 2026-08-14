@@ -73,12 +73,8 @@ async function syncUnanchoredRecords() {
         for (const row of tablesRes.rows) {
             const { table_id, table_name } = row;
             let pkCol = '';
-            if (table_name === 'date') pkCol = 'date_id';
-            else if (table_name === 'product') pkCol = 'product_id';
-            else if (table_name === 'machine') pkCol = 'machine_id';
-            else if (table_name === 'shift') pkCol = 'shift_id';
+            if (table_name === 'product') pkCol = 'product_id';
             else if (table_name === 'employee') pkCol = 'employee_id';
-            else if (table_name === 'factory') pkCol = 'factory_id';
             else if (table_name === 'production') pkCol = 'production_id';
 
             if (!pkCol) continue;
@@ -142,18 +138,14 @@ initializeServices().catch(console.error);
 app.get('/api/records/:tableName', async (req, res) => {
     const { tableName } = req.params;
 
-    const allowedTables = ['date', 'product', 'machine', 'shift', 'employee', 'factory', 'production'];
+    const allowedTables = ['product', 'employee', 'production'];
     if (!allowedTables.includes(tableName)) {
         return res.status(400).json({ success: false, message: "Geçersiz tablo adı." });
     }
 
     let pkCol = '';
-    if (tableName === 'date') pkCol = 'date_id';
-    else if (tableName === 'product') pkCol = 'product_id';
-    else if (tableName === 'machine') pkCol = 'machine_id';
-    else if (tableName === 'shift') pkCol = 'shift_id';
+    if (tableName === 'product') pkCol = 'product_id';
     else if (tableName === 'employee') pkCol = 'employee_id';
-    else if (tableName === 'factory') pkCol = 'factory_id';
     else if (tableName === 'production') pkCol = 'production_id';
 
     try {
@@ -175,7 +167,7 @@ app.get('/api/records/:tableName', async (req, res) => {
 app.post('/api/records/:tableName', async (req, res) => {
     const { tableName } = req.params;
 
-    const allowedTables = ['date', 'product', 'machine', 'shift', 'employee', 'factory', 'production'];
+    const allowedTables = ['product', 'employee', 'production'];
     if (!allowedTables.includes(tableName)) {
         return res.status(400).json({ success: false, message: "Geçersiz tablo adı." });
     }
@@ -217,12 +209,8 @@ app.get('/api/verify/:tableName/:recordId', async (req, res) => {
         const tableId = tableRes.rows[0].table_id;
 
         let pkCol = '';
-        if (tableName === 'date') pkCol = 'date_id';
-        else if (tableName === 'product') pkCol = 'product_id';
-        else if (tableName === 'machine') pkCol = 'machine_id';
-        else if (tableName === 'shift') pkCol = 'shift_id';
+        if (tableName === 'product') pkCol = 'product_id';
         else if (tableName === 'employee') pkCol = 'employee_id';
-        else if (tableName === 'factory') pkCol = 'factory_id';
         else if (tableName === 'production') pkCol = 'production_id';
 
         const dbResult = await pool.query(

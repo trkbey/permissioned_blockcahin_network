@@ -2,7 +2,6 @@ require('dotenv').config();
 const { ethers } = require('ethers');
 
 async function listAllHashes() {
-    console.log("Blockchain ağına bağlanılıyor...");
     const provider = new ethers.JsonRpcProvider(process.env.RPC_URL);
 
     const contractABI = require('./abi.json');

@@ -1,8 +1,8 @@
 import React from 'react';
 
-const Header = ({ activeTab, setActiveTab }) => {
+const Header = ({ activeTab, setActiveTab, isDarkMode, toggleDarkMode }) => {
   return (
-    <header className="glass-header">
+    <header className="app-header">
       <div className="logo">
         <div className="logo-icon">
           <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor">
@@ -13,9 +13,10 @@ const Header = ({ activeTab, setActiveTab }) => {
         </div>
         <h1>TableVerifier</h1>
       </div>
-      <nav className="main-tabs">
-        <button 
-          className={`main-tab-btn ${activeTab === 'add' ? 'active' : ''}`}
+      <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+        <nav className="main-tabs">
+          <button 
+            className={`main-tab-btn ${activeTab === 'add' ? 'active' : ''}`}
           onClick={() => setActiveTab('add')}
         >
           <span>+</span> Add
@@ -30,6 +31,15 @@ const Header = ({ activeTab, setActiveTab }) => {
           Verify
         </button>
       </nav>
+      <button 
+        onClick={toggleDarkMode}
+        className="btn-small"
+        title={isDarkMode ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+        style={{ padding: '0.4rem', borderRadius: '50%', background: 'transparent', border: '1px solid var(--border-color)', color: 'var(--text-main)', display: 'flex', alignItems: 'center', justifyContent: 'center', width: '32px', height: '32px' }}
+      >
+        {isDarkMode ? '☀️' : '🌙'}
+      </button>
+      </div>
     </header>
   );
 };

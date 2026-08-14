@@ -57,7 +57,7 @@ const AddRecordForm = ({ currentTable, setCurrentTable, allTables }) => {
         ))}
       </div>
 
-      <div className="glass-card form-card" style={{animation: 'scaleIn 0.4s ease'}}>
+      <div className="card form-card" style={{animation: 'scaleIn 0.4s ease'}}>
         <div style={{marginBottom: '1.5rem'}}>
           <h3 style={{color: statusMessage?.type === 'success' ? 'var(--success)' : statusMessage?.type === 'error' ? 'var(--danger)' : 'inherit'}}>
             {statusMessage ? statusMessage.text : `Add ${schema.title} Record`}
@@ -70,20 +70,42 @@ const AddRecordForm = ({ currentTable, setCurrentTable, allTables }) => {
               <div key={field.name} className="form-group">
                 <label htmlFor={field.name}>{field.label}</label>
                 <input 
-                  type={field.type} 
+                  type={field.type === 'number' ? 'text' : field.type} 
+                  inputMode={field.type === 'number' ? (field.step ? 'decimal' : 'numeric') : 'text'}
                   id={field.name} 
                   name={field.name} 
                   className="form-control" 
                   placeholder={`Enter ${field.label}...`} 
                   required 
-                  step={field.step || undefined}
+                  onInput={(e) => {
+                    let val = e.target.value;
+                    if (field.type === 'number') {
+                      if (!field.step) {
+                        val = val.replace(/[^0-9]/g, ''); // Sadece rakam
+                      } else {
+                        val = val.replace(/[^0-9.]/g, ''); // Rakam ve tek nokta
+                        const parts = val.split('.');
+                        if (parts.length > 2) {
+                          val = parts[0] + '.' + parts.slice(1).join('');
+                        }
+                      }
+                    } else if (field.type === 'text') {
+                      const numberAllowed = ['code', 'model', 'product_name', 'team'].some(kw => field.name.includes(kw));
+                      if (!numberAllowed) {
+                        val = val.replace(/[0-9]/g, ''); // Rakamları sil
+                      }
+                    }
+                    if (e.target.value !== val) {
+                      e.target.value = val;
+                    }
+                  }}
                 />
               </div>
             ))}
           </div>
           
           <div style={{display: 'flex', justifyContent: 'flex-end', marginTop: '1rem'}}>
-            <button type="submit" className="glow-btn" disabled={loading}>
+            <button type="submit" className="primary-btn" disabled={loading}>
               {loading ? <div className="spinner"></div> : <span>Save</span>}
             </button>
           </div>

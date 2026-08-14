@@ -94,6 +94,6 @@ export const TABLE_SCHEMAS = {
 };
 
 // These are the only tables we verify on blockchain now
-export const VERIFIABLE_TABLES = ['date', 'product', 'employee', 'production'];
+export const VERIFIABLE_TABLES = ['product', 'employee', 'production'];
 // These are all tables we can add data to
-export const ALL_TABLES = Object.keys(TABLE_SCHEMAS);
+export const ALL_TABLES = ['product', 'employee', 'production'];
