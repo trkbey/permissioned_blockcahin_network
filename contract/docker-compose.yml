@@ -13,5 +13,5 @@ services:
 
 networks:
   besu-net:
-    external:
-      name: blockchain-network_besu-net
+    name: blockchain-network_besu-net
+    external: true
