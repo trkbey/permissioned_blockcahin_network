@@ -68,7 +68,7 @@ async function syncUnanchoredRecords() {
     const client = await pool.connect();
 
     try {
-        // Blokzincir reset durumunu kontrol et
+
         const checkRes = await client.query('SELECT table_id, record_id FROM hash_anchors LIMIT 1');
         if (checkRes.rows.length > 0) {
             const sample = checkRes.rows[0];
@@ -80,7 +80,7 @@ async function syncUnanchoredRecords() {
                 if (err.code === 'BAD_DATA' && err.value === '0x') {
                     console.error("\n[SYNC] FATAL ERROR: Akıllı sözleşme bulunamadı! (Ağ tamamen sıfırlanmış).");
                     console.error("[SYNC] Lütfen önce 'contract' klasörüne gidip 'npm run deploy' ile sözleşmeyi ağa yükleyin, ardından backend'i yeniden başlatın!\n");
-                    return; // Sözleşme yoksa senkronizasyonu durdur
+                    return;
                 }
                 throw err;
             }
@@ -150,7 +150,6 @@ async function syncUnanchoredRecords() {
     }
 }
 
-// servisleri baslat
 async function initializeServices() {
     await syncUnanchoredRecords();
     await startDatabaseListener();
@@ -158,7 +157,7 @@ async function initializeServices() {
 
 initializeServices().catch(console.error);
 
-// arayuz icin genel tabloyu don
+
 app.get('/api/records/:tableName', async (req, res) => {
     const { tableName } = req.params;
 
