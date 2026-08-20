@@ -1,15 +1,16 @@
-version: '3.8'
+#for windows  copy .env.example .env && npm run genkey for mac or linux cp .env.example .env && npm run genkey
 
 services:
   smart-contract-deployer:
     build: .
     image: besu-contract-deployer:latest
     container_name: contract-deployer
+    env_file:
+      - .env
     environment:
-      - PRIVATE_KEY=0x6e45395610238c2c8f7b27575aba1e8d162793ad4bbc53d51a0db097feb3a9b5
+      RPC_URL: http://validator1:8545
     volumes:
       - ../app:/app_config
-
     networks:
       - besu-net
 

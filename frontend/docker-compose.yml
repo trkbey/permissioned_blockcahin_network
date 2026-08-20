@@ -1,7 +1,19 @@
+# Interface /proxies api requests from nginx to backend-api
+# (see P. nginx.conf). Therefore, it should be on the same Docker network as the backend
 services:
   frontend-ui:
-    build: .
+    build:
+      context: .
+      args:
+        VITE_API_URL: ${VITE_API_URL:-/api}
     container_name: frontend-ui
     ports:
       - "8080:80"
     restart: unless-stopped
+    networks:
+      - besu-net
+
+networks:
+  besu-net:
+    name: blockchain-network_besu-net
+    external: true

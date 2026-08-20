@@ -1,13 +1,23 @@
-version: '3.8'
-
 services:
   backend-api:
     image: besu-backend-api:latest
     build: .
     container_name: backend-api
-    ports:
-      - "3000:3000"
     env_file:
       - .env
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
+    ports:
+      - "127.0.0.1:3000:3000"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3000/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+    networks:
+      - besu-net
+
+networks:
+  besu-net:
+    name: blockchain-network_besu-net
+    external: true

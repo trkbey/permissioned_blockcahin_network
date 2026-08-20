@@ -1,0 +1,12 @@
+{
+  "name": "blockchain-network-tools",
+  "version": "1.0.0",
+  "private": true,
+  "description": "besu qbft agı icin genesis uretim araclari",
+  "scripts": {
+    "generate": "node generate-network.js"
+  },
+  "dependencies": {
+    "ethers": "^6.13.0"
+  }
+}

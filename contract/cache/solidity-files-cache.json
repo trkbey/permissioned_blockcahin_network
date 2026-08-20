@@ -35,6 +35,41 @@
       "artifacts": [
         "RecordAnchor"
       ]
+    },
+    "C:\\Users\\tarik\\Desktop\\test\\permissioned_blockchain_network\\contract\\contracts\\HashRegistry.sol": {
+      "lastModificationDate": 1787030431360,
+      "contentHash": "5fc93937235ba69e4cc0882aaf420646",
+      "sourceName": "contracts/HashRegistry.sol",
+      "solcConfig": {
+        "version": "0.8.19",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.19"
+      ],
+      "artifacts": [
+        "RecordAnchor"
+      ]
     }
   }
 }

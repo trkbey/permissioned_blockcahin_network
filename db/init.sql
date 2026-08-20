@@ -87,6 +87,22 @@ create table production (
     constraint fk_production_factory foreign key (factory_id) references factory(factory_id)
 );
 
+--Users table
+CREATE TABLE "users" (
+    "id"            TEXT PRIMARY KEY,
+    "username"      VARCHAR(50)  NOT NULL,
+    "password_hash" TEXT         NOT NULL,
+    "role"          VARCHAR(20)  NOT NULL,
+    "is_active"     BOOLEAN      NOT NULL DEFAULT TRUE,
+    "created_at"    TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "last_login_at" TIMESTAMP(3),
+
+    CONSTRAINT "users_role_check" CHECK ("role" IN ('reader', 'writer'))
+);
+
+-- "Admin" and "admin" is same account
+CREATE UNIQUE INDEX "users_username_lower_key" ON "users" (LOWER("username"));
+
 CREATE TABLE "hash_anchors" (
     "id" TEXT NOT NULL,
     "table_id" INTEGER NOT NULL,
@@ -122,14 +138,17 @@ RETURNS TRIGGER AS $$
 DECLARE
   v_table_id INTEGER;
   v_record_id TEXT;
+  v_client TEXT;
 BEGIN
- 
+
   SELECT table_id INTO v_table_id FROM tables WHERE table_name = TG_TABLE_NAME;
-  
+
   IF TG_TABLE_NAME = 'product' THEN v_record_id := NEW.product_id::TEXT;
   ELSIF TG_TABLE_NAME = 'employee' THEN v_record_id := NEW.employee_id::TEXT;
   ELSIF TG_TABLE_NAME = 'production' THEN v_record_id := NEW.production_id::TEXT;
   END IF;
+
+  v_client := current_setting('app.client_name', TRUE);
 
   PERFORM pg_notify(
     'new_critical_record',
@@ -137,10 +156,11 @@ BEGIN
       'table_id', v_table_id,
       'table_name', TG_TABLE_NAME,
       'record_id', v_record_id,
+      'client', v_client,
       'content', row_to_json(NEW)
     )::text
   );
-  
+
   RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;

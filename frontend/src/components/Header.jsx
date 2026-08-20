@@ -1,6 +1,6 @@
 import React from 'react';
 
-const Header = ({ activeTab, setActiveTab, isDarkMode, toggleDarkMode }) => {
+const Header = ({ activeTab, setActiveTab, isDarkMode, toggleDarkMode, client, canWrite, onSignOut }) => {
   return (
     <header className="app-header">
       <div className="logo">
@@ -14,13 +14,21 @@ const Header = ({ activeTab, setActiveTab, isDarkMode, toggleDarkMode }) => {
         <h1>TableVerifier</h1>
       </div>
       <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+        {client && (
+          <span className="client-badge" title={`API client "${client.name}" with role "${client.role}"`}>
+            {client.name} · {client.role}
+          </span>
+        )}
         <nav className="main-tabs">
-          <button 
+          {/* If there is no write permission the tab will not be displayed at all*/}
+          {canWrite && (
+          <button
             className={`main-tab-btn ${activeTab === 'add' ? 'active' : ''}`}
           onClick={() => setActiveTab('add')}
         >
           <span>+</span> Add
         </button>
+          )}
         <button 
           className={`main-tab-btn ${activeTab === 'verify' ? 'active' : ''}`}
           onClick={() => setActiveTab('verify')}
@@ -39,6 +47,11 @@ const Header = ({ activeTab, setActiveTab, isDarkMode, toggleDarkMode }) => {
       >
         {isDarkMode ? '☀️' : '🌙'}
       </button>
+      {onSignOut && (
+        <button onClick={onSignOut} className="btn-small" title="Sign out">
+          Sign out
+        </button>
+      )}
       </div>
     </header>
   );

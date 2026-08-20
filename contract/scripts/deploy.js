@@ -1,30 +1,40 @@
 const hre = require("hardhat");
+const fs = require("fs");
+const path = require("path");
+
+function updateContractAddress(envPath, address) {
+    if (!fs.existsSync(envPath)) {
+        console.log(`\nInfo: ${envPath} not found`);
+        console.log(`Add manual CONTRACT_ADDRESS=${address}`);
+        return;
+    }
+
+    const original = fs.readFileSync(envPath, "utf8");
+    const line = `CONTRACT_ADDRESS=${address}`;
+    const updated = /^CONTRACT_ADDRESS=.*$/m.test(original)
+        ? original.replace(/^CONTRACT_ADDRESS=.*$/m, line)
+        : original.replace(/\n*$/, "\n") + line + "\n";
+
+    fs.copyFileSync(envPath, envPath + ".bak");
+    fs.writeFileSync(envPath, updated);
+    console.log(`\n${envPath} Updated`);
+}
 
 async function main() {
-    console.log("Sözleşme ağa gönderiliyor...");
+    const [deployer] = await hre.ethers.getSigners();
+    console.log(`Addres that deploy ${deployer.address}`);
+    console.log("Contract sending to network");
 
     const contract = await hre.ethers.deployContract("RecordAnchor");
     await contract.waitForDeployment();
 
-    console.log(` RecordAnchor sözleşmesi şu adrese deploy edildi: ${contract.target}`);
-    const fs = require('fs');
-    const path = require('path');
+    console.log(`\nRecordAnchor deployed ${contract.target}`);
 
-    const envDir = fs.existsSync("/app_config") ? "/app_config" : path.join(__dirname, "../../app");
+    const envDir = fs.existsSync("/app_config")
+        ? "/app_config"
+        : path.join(__dirname, "..", "..", "app");
 
-    if (fs.existsSync(envDir)) {
-        const envPath = path.join(envDir, ".env");
-        const envContent = `PORT=3000
-DATABASE_URL=postgresql://tarik:ayb@host.docker.internal:5432/appdb
-RPC_URL=http://host.docker.internal:9545
-PRIVATE_KEY=0x6e45395610238c2c8f7b27575aba1e8d162793ad4bbc53d51a0db097feb3a9b5
-CONTRACT_ADDRESS=${contract.target}
-`;
-        fs.writeFileSync(envPath, envContent);
-        console.log(` app/.env dosyası otomatik olarak oluşturuldu ve güncellendi!`);
-    } else {
-        console.log(` Uyarı: app dizini bulunamadı, .env dosyası otomatik oluşturulamadı.`);
-    }
+    updateContractAddress(path.join(envDir, ".env"), contract.target);
 }
 
 main().catch((error) => {
