@@ -158,6 +158,7 @@ export const VERIFY_PRESENTATION = {
     SECURE: { tone: 'secure', icon: '🛡️', title: 'Verified' },
     TAMPERED: { tone: 'danger', icon: '⚠️', title: 'Tampered' },
     FORGED_TX: { tone: 'danger', icon: '⚠️', title: 'Invalid anchor' },
+    ANCHOR_ROW_DELETED: { tone: 'danger', icon: '⚠️', title: 'Audit row deleted' },
     ANCHOR_MISSING: { tone: 'warning', icon: '❓', title: 'Anchor missing' },
     PENDING: { tone: 'warning', icon: '⏳', title: 'Anchoring pending' },
 };

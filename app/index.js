@@ -184,7 +184,20 @@ async function anchorRecord({ tableId, tableName, recordId, content, createdBy, 
     return serializeAnchor(async () => {
         const existing = await chainCall(() => contract.recordHashes(uniqueBlockchainId));
         if (existing && existing !== '') {
-            console.log(`[ANCHOR] ${tableName}#${recordId} zaten zincirde. Atlaniyor.`);
+            // Buraya "muhurlenmemis" olarak gelen bir kaydin zincirde zaten muhru
+            // varsa, hash_anchors satiri silinmis demektir. Sessizce atlamak bunu
+            // kalicilastirir; en azindan operatore bagirilir.
+            if (existing !== recordHash) {
+                console.error(
+                    `[ANCHOR] UYARI: ${tableName}#${recordId} zincirde muhurlu ama denetim ` +
+                        `satiri yok VE icerik zincirdekiyle uyusmuyor. Tahrifat suphesi.`
+                );
+            } else {
+                console.warn(
+                    `[ANCHOR] ${tableName}#${recordId} zincirde muhurlu ama denetim satiri yok. ` +
+                        `Icerik saglam; denetim izi silinmis olabilir.`
+                );
+            }
             return { skipped: true };
         }
 
@@ -572,12 +585,54 @@ app.get(
             [tableId, recordId]
         );
 
+        // Muhur satirinin YOKLUGU tek basina "henuz muhurlenmedi" demek DEGILDIR.
+        //
+        // Veritabanina yazabilen bir saldirgan, kaydi degistirip hash_anchors
+        // satirini de silebilir. Zincire sorulmazsa bu, zararsiz gorunen
+        // PENDING olarak raporlanir ve tahrifat kalici olarak gizlenir.
+        // Bu yuzden PENDING donmeden ONCE zincir daima sorgulanir: zincirde bir
+        // muhur varken satirin olmamasi, mumkun olan en guclu tahrifat isaretidir.
         if (anchorRes.rows.length === 0) {
+            const orphanHash = await chainCall(() =>
+                contract.recordHashes(`${tableId}_${recordId}`)
+            );
+
+            if (!orphanHash || orphanHash === '') {
+                return ok(res, {
+                    status: 'PENDING',
+                    message:
+                        'This record has not been anchored yet. Anchoring may still be in progress.',
+                    dbHash: liveDbHash,
+                    chainHash: null,
+                    txHash: null,
+                });
+            }
+
+            const contentIntact = liveDbHash === orphanHash;
+
+            console.error(
+                `[VERIFY] Denetim satiri silinmis: ${tableName}#${recordId} zincirde muhurlu ` +
+                    `ama hash_anchors'ta kaydi yok (icerik ${contentIntact ? 'saglam' : 'DEGISMIS'}).`
+            );
+
+            await pool.query(
+                `INSERT INTO "verification_log"
+                   ("id", "table_id", "record_id", "computed_hash", "chain_hash", "is_valid")
+                 VALUES ($1, $2, $3, $4, $5, $6)`,
+                [crypto.randomUUID(), tableId, recordId, liveDbHash, orphanHash, false]
+            );
+
             return ok(res, {
-                status: 'PENDING',
-                message: 'This record has not been anchored yet. Anchoring may still be in progress.',
+                // Icerik degismisse bu duz bir tahrifattir; degismemisse denetim
+                // izi silinmistir. Ikisi de "beklemede" DEGILDIR.
+                status: contentIntact ? 'ANCHOR_ROW_DELETED' : 'TAMPERED',
+                message: contentIntact
+                    ? 'This record is anchored on the blockchain, but its anchor row has been ' +
+                      'deleted from the database. The content still matches the chain.'
+                    : 'The record in the database no longer matches its blockchain anchor, and ' +
+                      'its anchor row has been deleted from the database.',
                 dbHash: liveDbHash,
-                chainHash: null,
+                chainHash: orphanHash,
                 txHash: null,
             });
         }
