@@ -1,19 +1,19 @@
 #!/usr/bin/env node
 /*
- * One-command installation.
+ * Tek komutluk kurulum.
  *
- *   node bootstrap.js generates secrets and writes .env files
- *   node bootstrap.js --start also starts the entire stack in the correct order
- *   node bootstrap.js --force overwrites existing .env files
+ *   node bootstrap.js           sirlari uretir ve .env dosyalarini yazar
+ *   node bootstrap.js --start   ayrica tum yigini dogru sirada ayaga kaldirir
+ *   node bootstrap.js --force   mevcut .env dosyalarinin uzerine yazar
  *
- * Why it exists: In manual installation, seven separate sequences must be generated and placed, and these
- * BOTH must be kept synchronized in two separate files (database password and deployer
- * key) It's very easy to go wrong quietly when it's done by hand
+ * Neden var: elle kurulumda yedi ayri sir uretilip yerlestirilmeli ve bunlarin
+ * IKISI iki ayri dosyada senkron tutulmali (veritabani parolasi ve deployer
+ * anahtari). Elle yapildiginda sessizce yanlis gitmesi cok kolay.
  */
 const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
-const { execSync } = require('child_process');
+const { execSync, execFileSync } = require('child_process');
 
 const ROOT = __dirname;
 const args = process.argv.slice(2);
@@ -27,6 +27,15 @@ const fail = (msg) => {
     process.exit(1);
 };
 
+/*
+ * Komutlar tek bir dizge olarak calistirilir.
+ *
+ * Windows'ta `npm` aslinda `npm.cmd` oldugu icin kabuk sart. execFileSync'e
+ * hem args dizisi hem `shell: true` vermek Node 24'te DEP0190 uyarisi uretir
+ * (argumanlar kacisilmaz, yalnizca birlestirilir). Burada tum argumanlar
+ * kod icinden geldigi ve disaridan girdi almadigi icin dizge kullanmak
+ * hem guvenli hem uyarisiz.
+ */
 const run = (command, cwd) => execSync(command, { cwd, stdio: 'inherit' });
 
 const capture = (command, cwd) => execSync(command, { cwd, encoding: 'utf8' }).trim();
@@ -46,7 +55,10 @@ function writeEnv(relPath, lines) {
     log(`    yazildi: ${relPath}`);
 }
 
-step(0, 'Checking');
+// ---------------------------------------------------------------------------
+// On kontroller
+// ---------------------------------------------------------------------------
+step(0, 'On kosullar kontrol ediliyor');
 
 const nodeMajor = Number(process.versions.node.split('.')[0]);
 if (nodeMajor < 20) fail(`Node.js 20+ gerekli (mevcut: ${process.version}).`);
@@ -69,14 +81,22 @@ if (existing.length > 0 && !FORCE) {
     );
 }
 
+// ---------------------------------------------------------------------------
+// 1. Ag kimlik materyali
+// ---------------------------------------------------------------------------
 step(1, 'Validator anahtarlari, genesis ve bootnode listesi uretiliyor');
 
 const networkDir = path.join(ROOT, 'blockchain-network');
 run('npm install --no-fund --no-audit', networkDir);
 run(`node generate-network.js${FORCE ? ' --force' : ''}`, networkDir);
 
+// generate-network.js ethers'i kurdu; deployer anahtari icin ayni kurulumu
+// yeniden kullaniyoruz, boylece dorduncu bir package.json gerekmiyor.
 const { ethers } = require(path.join(ROOT, 'blockchain-network', 'node_modules', 'ethers'));
 
+// ---------------------------------------------------------------------------
+// 2. Sirlar
+// ---------------------------------------------------------------------------
 step(2, 'Sirlar uretiliyor');
 
 const dbUser = 'appuser';
@@ -94,6 +114,9 @@ const viewerPassword = secret(15);
 log(`    deployer adresi : ${deployer.address}`);
 log(`    2 API anahtari, JWT gizli anahtari ve 2 kullanici parolasi uretildi`);
 
+// ---------------------------------------------------------------------------
+// 3. .env dosyalari  (senkron noktalari BURADA garanti altina aliniyor)
+// ---------------------------------------------------------------------------
 step(3, '.env dosyalari yaziliyor');
 
 writeEnv('db/.env', [
@@ -140,6 +163,8 @@ writeEnv('app/.env', [
     'ALLOW_AUDIT_RESET=false',
 ]);
 
+// frontend/.env teknik olarak istege bagli (compose ve Dockerfile'da /api
+// varsayilani var) ama acikca yazmak kurulumu daha anlasilir kiliyor.
 writeEnv('frontend/.env', [
     '# bootstrap.js tarafindan uretildi. Commit etmeyin.',
     '# API ayni origin uzerinden nginx ile servis edilir; sir icermez.',
@@ -162,7 +187,9 @@ fs.writeFileSync(
 );
 log('    yazildi: LOGIN_BILGILERI.txt');
 
-
+// ---------------------------------------------------------------------------
+// 4. Yigini ayaga kaldir (istege bagli)
+// ---------------------------------------------------------------------------
 if (!START) {
     log('\n' + '='.repeat(70));
     log('Yapilandirma hazir. Yigini su SIRAYLA ayaga kaldirin:');
@@ -187,9 +214,14 @@ function compose(dir, composeArgs, label) {
     run(`docker compose ${composeArgs}`, path.join(ROOT, dir));
 }
 
-
+// Senkron uyku. Bootstrap bastan sona sirali oldugu icin async'e gerek yok.
 const sleep = (ms) => Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, ms);
 
+/**
+ * Bir konteynerin healthcheck'i "healthy" olana kadar bekler.
+ * Hem besu hem postgres imajlari healthcheck tanimlar; RPC'yi elle
+ * yoklamaktan daha guvenilir.
+ */
 function waitHealthy(container, timeoutMs, label) {
     step('*', `${label} bekleniyor`);
     const deadline = Date.now() + timeoutMs;
@@ -210,9 +242,66 @@ function waitHealthy(container, timeoutMs, label) {
     fail(`${container} ${timeoutMs / 1000} saniyede hazir olmadi. \`docker logs ${container}\` bakin.`);
 }
 
-compose('blockchain-network', 'up -d', 'Blokzincir agi baslatiliyor');
+/**
+ * Zincirin gercekten blok urettigini RPC ile dogrular.
+ *
+ * Besu imajinin gomulu healthcheck'i yalnizca /tmp/pid dosyasina bakar; bu,
+ * crash-loop sirasinda yaniltici olabilir. Blok numarasi > 0 gormek, QBFT
+ * konsensusunun kuruldugunun kesin kanitidir.
+ *
+ * Probe, validator1'in host'a yayinladigi 127.0.0.1:9545 portuna Node'un kendi
+ * fetch'i ile gider. Besu imajinda curl YOK, bu yuzden `docker exec` ile
+ * yoklanamaz; host portu + Node fetch hicbir dis araca bagimli degildir.
+ */
+function chainBlockNumber() {
+    const script =
+        "fetch('http://127.0.0.1:9545',{method:'POST'," +
+        "headers:{'content-type':'application/json'}," +
+        "body:JSON.stringify({jsonrpc:'2.0',method:'eth_blockNumber',params:[],id:1})})" +
+        ".then(r=>r.json()).then(d=>process.stdout.write(String(parseInt(d.result||'0x0',16))))" +
+        ".catch(()=>process.stdout.write('0'))";
+    try {
+        return Number(execFileSync(process.execPath, ['-e', script], { encoding: 'utf8', timeout: 8000 }).trim()) || 0;
+    } catch {
+        return 0;
+    }
+}
 
-waitHealthy('validator1', 180000, 'Zincirin hazir olmasi');
+function waitChainReady(timeoutMs) {
+    step('*', 'Zincirin blok uretmesi bekleniyor');
+    const deadline = Date.now() + timeoutMs;
+    while (Date.now() < deadline) {
+        const n = chainBlockNumber();
+        if (n > 0) {
+            log(`    zincir hazir (blok ${n})`);
+            return;
+        }
+        sleep(3000);
+    }
+    fail(
+        'Zincir ' + timeoutMs / 1000 + ' saniyede blok uretmedi.\n' +
+        '       En sik neden: eski besu hacimleri yeni genesis ile uyumsuz.\n' +
+        '       `docker logs validator1` ciktisinda "genesis does not match" arayin.'
+    );
+}
+
+// Bootstrap her calistiginda genesis'i ve tum sirlari YENIDEN uretir. Onceki
+// calismalardan kalan besu zincir hacimleri (eski genesis) ve postgres veri
+// hacmi (eski parola) yenileriyle UYUMSUZDUR: besu crash-loop'a girer, postgres
+// eski parolayla kilitli kalir. Docker isimli hacimler global oldugu ve `git clone`
+// ile yeni dizine tasindiginda bile kaldigi icin, baslatmadan once acikca silinir.
+step('*', 'Onceki kurulumdan kalan hacimler temizleniyor');
+for (const dir of ['frontend', 'app', 'contract', 'db', 'blockchain-network']) {
+    try {
+        run('docker compose down -v', path.join(ROOT, dir));
+    } catch {
+        /* servis hic kurulmamis olabilir; sorun degil */
+    }
+}
+
+compose('blockchain-network', 'up -d', 'Blokzincir agi baslatiliyor');
+// Sozlesme deploy'u zincirin blok uretiyor olmasini gerektirir.
+waitChainReady(180000);
 
 compose('db', 'up -d --build', 'Veritabani baslatiliyor');
 waitHealthy('postgres_db', 120000, 'Veritabaninin hazir olmasi');
